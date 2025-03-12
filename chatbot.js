@@ -1,6 +1,7 @@
-const fs = require('fs');
 const http = require('http');
+const fs = require('fs');
 const { Client, LocalAuth } = require('whatsapp-web.js');
+const qrcode = require('qrcode-terminal');
 
 // Configuração do servidor HTTP (keep-alive)
 const server = http.createServer((req, res) => {
@@ -8,14 +9,10 @@ const server = http.createServer((req, res) => {
     res.end('Bot is alive!');
 });
 
-const port = process.env.PORT || 4000; // Tente a porta 4000
+const port = process.env.PORT || 3000;
 
-server.listen(port, (err) => {
-    if (err) {
-        console.error("Erro ao iniciar o servidor HTTP:", err);
-    } else {
-        console.log(`Keep-alive server listening on port ${port}`);
-    }
+server.listen(port, () => {
+    console.log(`Keep-alive server listening on port ${port}`);
 });
 
 // Caminho para o arquivo de sessão
@@ -28,6 +25,11 @@ const client = new Client({
         headless: true,
         args: ['--no-sandbox'],
     }
+});
+
+// Gera o QR code no terminal (apenas para a primeira conexão)
+client.on('qr', qr => {
+    qrcode.generate(qr, { small: true });
 });
 
 // Evento de autenticação (salva a sessão)
