@@ -1,6 +1,7 @@
-const http = require('http');
 const fs = require('fs');
+const http = require('http');
 const { Client, LocalAuth } = require('whatsapp-web.js');
+const qrcode = require('qrcode-terminal'); // Adicionei essa linha
 
 // Configuração do servidor HTTP (keep-alive)
 const server = http.createServer((req, res) => {
@@ -24,6 +25,11 @@ const client = new Client({
         headless: true,
         args: ['--no-sandbox'],
     }
+});
+
+// Evento para gerar o QR code no terminal
+client.on('qr', qr => {
+    qrcode.generate(qr, { small: true });
 });
 
 // Evento de autenticação (salva a sessão)
