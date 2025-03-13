@@ -1,73 +1,73 @@
 const http = require('http');
-const fs = require('fs');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 
-// Configuração do servidor HTTP (keep-alive)
+// 🟢 Servidor HTTP para manter o bot ativo no Render
 const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end('Bot is alive!');
 });
 
 const port = process.env.PORT || 3000;
+server.listen(port, () => console.log(`✅ Keep-alive server rodando na porta ${port}`));
 
-server.listen(port, () => {
-    console.log(`Keep-alive server listening on port ${port}`);
-});
-
-// Caminho para o arquivo de sessão
-const SESSION_FILE_PATH = './session.json';
-
-// Inicializa o cliente whatsapp-web.js com LocalAuth
+// 🟢 Inicializa o cliente WhatsApp com LocalAuth
 const client = new Client({
     authStrategy: new LocalAuth({
-        clientId: process.env.CLIENT_ID // Use a variável de ambiente
+        clientId: "gera-digital-bot" // Isso permite múltiplas instâncias se necessário
     }),
     puppeteer: {
         headless: true,
-        args: ['--no-sandbox'],
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process',
+            '--disable-gpu'
+        ]
     }
 });
 
-// Gera o QR code no terminal (apenas para a primeira conexão)
+// 🟢 Gera QR Code no terminal para login
 client.on('qr', qr => {
+    console.log('🔵 Escaneie o QR Code abaixo para conectar:');
     qrcode.generate(qr, { small: true });
 });
 
-// Evento de autenticação (salva a sessão)
-client.on('authenticated', (session) => {
-    console.log('Autenticado! Salvando sessão...');
+// 🟢 Evento de autenticação bem-sucedida
+client.on('authenticated', () => {
+    console.log('✅ Autenticado com sucesso!');
 });
 
-// Evento de sessão salva
-client.on('session', (session) => {
-    fs.writeFile(SESSION_FILE_PATH, JSON.stringify(session), (err) => {
-        if (err) {
-            console.error(err);
-        }
-    });
-});
-
-// Evento de inicialização
+// 🟢 Evento quando o bot está pronto para uso
 client.on('ready', () => {
-    console.log('Tudo certo! WhatsApp conectado.');
+    console.log('🤖 Bot conectado e pronto para uso!');
 });
 
-// Evento de falha de autenticação
+// 🛑 Evento de falha na autenticação
 client.on('auth_failure', msg => {
-    console.error('AUTHENTICATION FAILURE', msg);
+    console.error('❌ Falha na autenticação:', msg);
 });
 
-// Inicializa o cliente
+// 🛑 Evento de desconexão do cliente
+client.on('disconnected', reason => {
+    console.warn('⚠️ Cliente desconectado:', reason);
+});
+
+// 🟢 Inicializa o bot
 client.initialize();
 
-// Função de delay
+// 🕐 Função de delay para simular digitação
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-// Evento de mensagem
+// 📩 Evento de mensagem recebida
 client.on('message', async msg => {
-    console.log("Mensagem recebida:", msg.body); // Adicione esta linha
-    if (msg.body.match(/(Quero saber mais|trabalha com automação|Voçês fazem automação?| Automação)/i) && msg.from.endsWith('@c.us')) {
+    console.log("📩 Mensagem recebida:", msg.body);
+
+    if (msg.body.match(/(Quero saber mais|trabalha com automação|Vocês fazem automação?| Automação)/i) && msg.from.endsWith('@c.us')) {
         const chat = await msg.getChat();
         await delay(2000);
         await chat.sendStateTyping();
