@@ -8,7 +8,7 @@ const server = http.createServer((req, res) => {
     res.end('Bot is alive!');
 });
 
-const port = process.env.PORT || 10000;
+const port = process.env.PORT || 3000;
 server.listen(port, () => console.log(`✅ Keep-alive server rodando na porta ${port}`));
 
 // 🟢 Inicializa o cliente WhatsApp com LocalAuth
