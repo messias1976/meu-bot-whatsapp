@@ -18,6 +18,8 @@ const client = new Client({
     }),
     puppeteer: {
         headless: true,
+        // Remove as opções abaixo temporariamente para teste
+        /*
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -28,6 +30,7 @@ const client = new Client({
             '--single-process',
             '--disable-gpu'
         ]
+        */
     }
 });
 
@@ -57,8 +60,17 @@ client.on('disconnected', reason => {
     console.warn('⚠️ Cliente desconectado:', reason);
 });
 
-// 🟢 Inicializa o bot
-client.initialize();
+// Adicione logs antes da inicialização
+console.log("Iniciando a inicialização do cliente...");
+
+try {
+    // 🟢 Inicializa o bot
+    console.log("Chamando client.initialize()...");
+    client.initialize();
+    console.log("client.initialize() foi chamado.");
+} catch (error) {
+    console.error("Erro ao inicializar o cliente:", error);
+}
 
 // 🕐 Função de delay para simular digitação
 const delay = ms => new Promise(res => setTimeout(res, ms));
