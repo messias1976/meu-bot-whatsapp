@@ -8,7 +8,7 @@ const server = http.createServer((req, res) => {
     res.end('Bot is alive!');
 });
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 10000;
 server.listen(port, () => console.log(`✅ Keep-alive server rodando na porta ${port}`));
 
 // 🟢 Inicializa o cliente WhatsApp com LocalAuth
@@ -67,7 +67,7 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 client.on('message', async msg => {
     console.log("📩 Mensagem recebida:", msg.body);
 
-    if (msg.body.match(/(Quero saber mais|trabalha com automação|Vocês fazem automação?| Automação)/i) && msg.from.endsWith('@c.us')) {
+    if (msg.body.match(/(Quero saber mais|trabalha com automação|Vocês fazem automação| Automação)/i) && msg.from.endsWith('@c.us')) {
         const chat = await msg.getChat();
         await delay(2000);
         await chat.sendStateTyping();
