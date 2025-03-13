@@ -1,141 +1,130 @@
-const http = require('http');
-const { Client, LocalAuth } = require('whatsapp-web.js');
+// leitor de qr code
 const qrcode = require('qrcode-terminal');
-
-// 🟢 Servidor HTTP para manter o bot ativo no Render
-const server = http.createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Bot is alive!');
-});
-
-const port = process.env.PORT || 3000;
-server.listen(port, () => console.log(`✅ Keep-alive server rodando na porta ${port}`));
-
-// 🟢 Inicializa o cliente WhatsApp com LocalAuth
-const client = new Client({
-    authStrategy: new LocalAuth({
-        clientId: "gera-digital-bot" // Isso permite múltiplas instâncias se necessário
-    }),
-    puppeteer: {
-        headless: true,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--single-process',
-            '--disable-gpu'
-        ]
-    }
-});
-
-// 🟢 Gera QR Code no terminal para login
+const { Client, Buttons, List, MessageMedia } = require('whatsapp-web.js'); // Mudança Buttons
+const client = new Client();
+// serviço de leitura do qr code
 client.on('qr', qr => {
-    console.log('🔵 Escaneie o QR Code abaixo para conectar:');
-    qrcode.generate(qr, { small: true });
+    qrcode.generate(qr, {small: true});
 });
-
-// 🟢 Evento de autenticação bem-sucedida
-client.on('authenticated', () => {
-    console.log('✅ Autenticado com sucesso!');
-});
-
-// 🟢 Evento quando o bot está pronto para uso
+// apos isso ele diz que foi tudo certo
 client.on('ready', () => {
-    console.log('🤖 Bot conectado e pronto para uso!');
+    console.log('Tudo certo! WhatsApp conectado.');
 });
-
-// 🛑 Evento de falha na autenticação
-client.on('auth_failure', msg => {
-    console.error('❌ Falha na autenticação:', msg);
-});
-
-// 🛑 Evento de desconexão do cliente
-client.on('disconnected', reason => {
-    console.warn('⚠️ Cliente desconectado:', reason);
-});
-
-// 🟢 Inicializa o bot
+// E inicializa tudo 
 client.initialize();
 
-// 🕐 Função de delay para simular digitação
-const delay = ms => new Promise(res => setTimeout(res, ms));
+const delay = ms => new Promise(res => setTimeout(res, ms)); // Função que usamos para criar o delay entre uma ação e outra
 
-// 📩 Evento de mensagem recebida
+// Funil
+
 client.on('message', async msg => {
-    console.log("📩 Mensagem recebida:", msg.body);
 
-    if (msg.body.match(/(Quero saber mais|trabalha com automação|Vocês fazem automação| Automação)/i) && msg.from.endsWith('@c.us')) {
+    if (msg.body.match(/(menu|Menu|dia|tarde|noite|oi|Oi|Olá|olá|ola|Ola)/i) && msg.from.endsWith('@c.us')) {
+
         const chat = await msg.getChat();
-        await delay(2000);
-        await chat.sendStateTyping();
-        await delay(2000);
-        const contact = await msg.getContact();
-        const name = contact.pushname.split(" ")[0];
 
-        await client.sendMessage(msg.from, `Olá ${name}! Sou o assistente virtual da Gera Digital. 
-
-Ajudamos empresas a automatizar o WhatsApp para aumentar vendas e melhorar o atendimento.
-
-Escolha uma opção:
-
-1️⃣ Como funciona a automação?
-2️⃣ Benefícios da automação
-3️⃣ Quero me cadastrar para uma consultoria gratuita`);
+        await delay(3000); //delay de 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000); //Delay de 3000 milisegundos mais conhecido como 3 segundos
+        const contact = await msg.getContact(); //Pegando o contato
+        const name = contact.pushname; //Pegando o nome do contato
+        await client.sendMessage(msg.from,'Olá! '+ name.split(" ")[0] + 'Sou o assistente virtual da empresa tal. Como posso ajudá-lo hoje? Por favor, digite uma das opções abaixo:\n\n1 - Como funciona\n2 - Valores dos planos\n3 - Benefícios\n4 - Como aderir\n5 - Outras perguntas'); //Primeira mensagem de texto
+        await delay(3000); //delay de 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(5000); //Delay de 5 segundos
+    
+        
     }
 
-    if (msg.body === '1' && msg.from.endsWith('@c.us')) {
-        await delay(2000);
-        await client.sendMessage(msg.from, `📌 *Como funciona a automação do WhatsApp?*
 
-- Criamos um bot personalizado para o seu negócio.
-- Ele responde clientes automaticamente.
-- Agenda reuniões e organiza seu atendimento.
-- Converte mais leads sem esforço manual.
 
-💡 Escolha outra opção:
-2️⃣ Benefícios da automação
-3️⃣ Quero me cadastrar para uma consultoria gratuita
-0️⃣ Voltar ao menu principal`);
+
+    if (msg.body !== null && msg.body === '1' && msg.from.endsWith('@c.us')) {
+        const chat = await msg.getChat();
+
+
+        await delay(3000); //delay de 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, 'Nosso serviço oferece consultas médicas 24 horas por dia, 7 dias por semana, diretamente pelo WhatsApp.\n\nNão há carência, o que significa que você pode começar a usar nossos serviços imediatamente após a adesão.\n\nOferecemos atendimento médico ilimitado, receitas\n\nAlém disso, temos uma ampla gama de benefícios, incluindo acesso a cursos gratuitos');
+
+        await delay(3000); //delay de 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, 'COMO FUNCIONA?\nÉ muito simples.\n\n1º Passo\nFaça seu cadastro e escolha o plano que desejar.\n\n2º Passo\nApós efetuar o pagamento do plano escolhido você já terá acesso a nossa área exclusiva para começar seu atendimento na mesma hora.\n\n3º Passo\nSempre que precisar');
+
+        await delay(3000); //delay de 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, 'Link para cadastro: https://site.com');
+
+
     }
 
-    if (msg.body === '2' && msg.from.endsWith('@c.us')) {
-        await delay(2000);
-        await client.sendMessage(msg.from, `🚀 *Benefícios da automação do WhatsApp:*
+    if (msg.body !== null && msg.body === '2' && msg.from.endsWith('@c.us')) {
+        const chat = await msg.getChat();
 
-✔ Atendimento 24/7 sem precisar de equipe o tempo todo.
-✔ Captação automática de leads qualificados.
-✔ Respostas rápidas e personalizadas para clientes.
-✔ Integração com CRM e outros sistemas.
 
-💡 Escolha outra opção:
-1️⃣ Como funciona a automação?
-3️⃣ Quero me cadastrar para uma consultoria gratuita
-0️⃣ Voltar ao menu principal`);
+        await delay(3000); //Delay de 3000 milisegundos mais conhecido como 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, '*Plano Individual:* R$22,50 por mês.\n\n*Plano Família:* R$39,90 por mês, inclui você mais 3 dependentes.\n\n*Plano TOP Individual:* R$42,50 por mês, com benefícios adicionais como\n\n*Plano TOP Família:* R$79,90 por mês, inclui você mais 3 dependentes');
+
+        await delay(3000); //delay de 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, 'Link para cadastro: https://site.com');
     }
 
-    if (msg.body === '3' && msg.from.endsWith('@c.us')) {
-        await delay(2000);
-        await client.sendMessage(msg.from, `📝 *Cadastro para consultoria gratuita!* 
+    if (msg.body !== null && msg.body === '3' && msg.from.endsWith('@c.us')) {
+        const chat = await msg.getChat();
 
-Aproveite uma análise gratuita do seu negócio para entender como a automação pode te ajudar.
 
-🔹 Preencha o formulário: [https://forms.gle/9yzQj4RzT2vGjQwu6]
+        await delay(3000); //Delay de 3000 milisegundos mais conhecido como 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, 'Sorteio de em prêmios todo ano.\n\nAtendimento médico ilimitado 24h por dia.\n\nReceitas de medicamentos');
+        
+        await delay(3000); //delay de 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, 'Link para cadastro: https://site.com');
 
-💡 Escolha outra opção:
-1️⃣ Como funciona a automação?
-2️⃣ Benefícios da automação
-0️⃣ Voltar ao menu principal`);
     }
 
-    if (msg.body === '0' && msg.from.endsWith('@c.us')) {
-        await delay(2000);
-        await client.sendMessage(msg.from, `🔄 Voltando ao menu principal...
+    if (msg.body !== null && msg.body === '4' && msg.from.endsWith('@c.us')) {
+        const chat = await msg.getChat();
 
-1️⃣ Como funciona a automação?
-2️⃣ Benefícios da automação
-3️⃣ Quero me cadastrar para uma consultoria gratuita`);
+        await delay(3000); //Delay de 3000 milisegundos mais conhecido como 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, 'Você pode aderir aos nossos planos diretamente pelo nosso site ou pelo WhatsApp.\n\nApós a adesão, você terá acesso imediato');
+
+
+        await delay(3000); //delay de 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, 'Link para cadastro: https://site.com');
+
+
     }
+
+    if (msg.body !== null && msg.body === '5' && msg.from.endsWith('@c.us')) {
+        const chat = await msg.getChat();
+
+        await delay(3000); //Delay de 3000 milisegundos mais conhecido como 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, 'Se você tiver outras dúvidas ou precisar de mais informações, por favor, fale aqui nesse whatsapp ou visite nosso site: https://site.com ');
+
+
+    }
+
+
+
+
+
+
+
+
 });
