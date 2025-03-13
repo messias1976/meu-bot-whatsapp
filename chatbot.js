@@ -64,6 +64,7 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 
 // Evento de mensagem
 client.on('message', async msg => {
+        console.log("Mensagem recebida:", msg.body); // Adicione esta linha
     if (msg.body.match(/(Quero saber mais|trabalha com automação|Voçês fazem automação?| Automação)/i) && msg.from.endsWith('@c.us')) {
         const chat = await msg.getChat();
         await delay(2000);
